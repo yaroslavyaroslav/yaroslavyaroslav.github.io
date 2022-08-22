@@ -1,16 +1,19 @@
 languageCode = "en-us"
-title = "Anubis"
+title = "My dear diary"
 theme = "anubis"
-paginate = 10
+paginate = 4
 baseURL = 'https://yaroslavyaroslav.github.io/'
+
+# disqusShortname = ""
+# googleAnalytics = ""
+# enableRobotsTXT: true
 
 [author]
 name = "Yaroslav Yashin"
 
-
 [params]
 author = "Yaroslav Yashin"
-description = "Anubis is a simple minimalist theme for Hugo blog engine."
+description = "Blog about AI, Swift and Web3. In this particular order."
 dateFormat = "2006-01-02"
 paginationSinglePost = true
 style = "auto"
@@ -19,14 +22,23 @@ readNextPosts = 2
 copyCodeButton = true
 rssAsSocialIcon = true
 
+[[params.social]]
+id = "twitter"
+url = "https://twitter.com/Yaroslav_Ya"
+
+[[params.social]]
+id = "github"
+url = "https://github.com/mitrichius/hugo-theme-anubis"
+
+# [[params.social]]
 
 [menu]
 
-[[menu.main]]
-identifier = "about"
-name = "About"
-url = "/about/"
-weight = 1
+# [[menu.main]]
+# identifier = "about"
+# name = "About"
+# url = "/about/"
+# weight = 1
 
 [[menu.main]]
 identifier = "tags"
@@ -46,18 +58,6 @@ tag = "tags"
 
 [markup.goldmark.renderer]
 unsafe = true
-
-# disqusShortname: "yourdiscussshortname"
-# googleAnalytics: "G-12345"
-# enableRobotsTXT: true
-
-# menu:
-#   main:
-#   - identifier: archive
-#     name: Archive
-#     title: Archive
-#     url: /posts/
-#     weight: 0
 
 # params:
 #   author: "Yaroslav Yashin"
