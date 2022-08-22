@@ -30,7 +30,9 @@ url = "https://twitter.com/Yaroslav_Ya"
 id = "github"
 url = "https://github.com/yaroslavyaroslav"
 
-# [[params.social]]
+[[params.social]]
+id = 'linkedin'
+url = 'https://www.linkedin.com/in/yaroslav-yashin-65706083/'
 
 [menu]
 
