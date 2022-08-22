@@ -3,10 +3,9 @@ title = "My dear diary"
 theme = "anubis"
 paginate = 4
 baseURL = 'https://yaroslavyaroslav.github.io/'
+enableRobotsTXT = true
 
-# disqusShortname = ""
 # googleAnalytics = ""
-# enableRobotsTXT: true
 
 [author]
 name = "Yaroslav Yashin"
