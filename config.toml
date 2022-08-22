@@ -61,7 +61,7 @@ url = "https://github.com/yaroslavyaroslav"
 id = 'linkedin'
 url = 'https://www.linkedin.com/in/yaroslav-yashin-65706083/'
 
-# [[params.webmentions]]
-# login = 'yaroslavyaroslav.github.io'
-# pingback = true
+[webmentions]
+login = 'yaroslavyaroslav.github.io'
+pingback = true
 
