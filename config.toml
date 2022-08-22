@@ -11,36 +11,7 @@ baseURL = 'https://yaroslavyaroslav.github.io/'
 [author]
 name = "Yaroslav Yashin"
 
-[params]
-author = "Yaroslav Yashin"
-description = "Blog about AI, Swift and Web3. In this particular order."
-dateFormat = "2006-01-02"
-paginationSinglePost = true
-style = "auto"
-readMore = false
-readNextPosts = 2
-copyCodeButton = true
-rssAsSocialIcon = true
-
-[[params.social]]
-id = "twitter"
-url = "https://twitter.com/Yaroslav_Ya"
-
-[[params.social]]
-id = "github"
-url = "https://github.com/yaroslavyaroslav"
-
-[[params.social]]
-id = 'linkedin'
-url = 'https://www.linkedin.com/in/yaroslav-yashin-65706083/'
-
 [menu]
-
-# [[menu.main]]
-# identifier = "about"
-# name = "About"
-# url = "/about/"
-# weight = 1
 
 [[menu.main]]
 identifier = "tags"
@@ -61,11 +32,20 @@ tag = "tags"
 [markup.goldmark.renderer]
 unsafe = true
 
+[params]
+author = "Yaroslav Yashin"
+email = 'caimans-spurs-0u@icloud.com' # used for microformats
+description = "Blog about AI, Swift and Web3. In this particular order."
+dateFormat = "2006-01-02"
+paginationSinglePost = true
+style = "auto"
+# style = 'light-without-switcher'
+readMore = false
+readNextPosts = 2
+rssAsSocialIcon = true
+
 # params:
-#   author: "Yaroslav Yashin"
-#   email: caimans-spurs-0u@icloud.com # used for microformats
 #   # avatar: "/images/me.png" # used for microformats
-#   description: ""
 #   # Uncomment if you need this
 #   # images:
 #   #   - images/og-featured.png # relative path to "static" directory
@@ -73,14 +53,7 @@ unsafe = true
 #   #   - css/my.css # relative path to "assets" directory (don't use main.css filename)
 #   # customJS:
 #   #   - js/main.js # relative path to "assets" directory
-#   dateFormat: "2006-01-02"
-#   paginationSinglePost: true
-#   style: light-without-switcher
-#   readMore: false # show read more button
-#   readNextPosts: 5  # show 5 related posts, 0 by default
-#   disableSummary: false
-#   copyCodeButton: true # true by default
-#   rssAsSocialIcon: true
+
 #   # # utteranc.es support
 #   # utterancesRepo: ""  # mandatory
 #   # utterancesTheme: "" # optional
@@ -105,14 +78,15 @@ unsafe = true
 #   #   url: https://yourdomain.com/webemntions/receive
 #   #   login: hugo-theme-anubis
 #   #   pingback: true
-#   # social:
-#   # - id: github
-#   #   name: gohugoio
-# #  - id: hugo
-# #    url: "https://gohugo.io/"
-# #    icon: "hugo"
 
-# markup:
-#   goldmark:
-#     renderer:
-#       unsafe: true # enable raw HTML in Markdown
+[[params.social]]
+id = "twitter"
+url = "https://twitter.com/Yaroslav_Ya"
+
+[[params.social]]
+id = "github"
+url = "https://github.com/yaroslavyaroslav"
+
+[[params.social]]
+id = 'linkedin'
+url = 'https://www.linkedin.com/in/yaroslav-yashin-65706083/'
