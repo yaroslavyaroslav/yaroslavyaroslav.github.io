@@ -13,16 +13,16 @@ name = "Yaroslav Yashin"
 [menu]
 
 [[menu.main]]
+name = "Archive"
+identifier = "archive"
+url = "/posts/"
+weight = 1
+
+[[menu.main]]
 identifier = "tags"
 name = "Tags"
 url = "/tags/"
 weight = 2
-
-[[menu.main]]
-name = "Archive"
-identifier = "archive"
-url = "/posts/"
-weight = 3
 
 [taxonomies]
 category = "categories"
@@ -46,7 +46,6 @@ rssAsSocialIcon = true
 utterancesRepo = "yaroslavyaroslav/yaroslavyaroslav.github.io"  # mandatory
 utterancesTheme = "github-dark" # optional
 utterancesIssue = "url" # optional
-utterancesLabel = "🧵" # optional
 
 [[params.social]]
 id = "twitter"
