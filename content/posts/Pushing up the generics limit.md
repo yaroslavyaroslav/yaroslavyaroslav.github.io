@@ -1,11 +1,10 @@
 ---
-title: "My First Post"
+title: Dynamic generic types
 date: 2022-08-22T17:01:43+07:00
-draft: false
-tags: ["some", "one"]
+draft: true
+tags: [swift, generics]
 ---
 
-# Dynamic generic types
 ## Abstract
 Prior the **Swift 5.7** release there is a lack of using protocol with `associatedtype` as a type of arguments of a method rather as a returning type. As well as this release gives a really convenient way to solve that task with [SE-0309](https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md "") and [SE-0346](https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md ""), this options still not available for any previous iOS rather then iOS/iPadOS 16 and macOS 13 and for Swift language any previous version itself.
 
