@@ -4,7 +4,6 @@ date: 2022-08-22T17:01:43+07:00
 draft: true
 tags: [swift, generics]
 ---
-
 ## Abstract
 Prior the **Swift 5.7** release there is a lack of using protocol with `associatedtype` as a type of arguments of a method rather as a returning type. As well as this release gives a really convenient way to solve that task with [SE-0309](https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md "") and [SE-0346](https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md ""), this options still not available for any previous iOS rather then iOS/iPadOS 16 and macOS 13 and for Swift language any previous version itself.
 
@@ -105,7 +104,7 @@ The other way which is seems workable here is to add an`associatedtype` value in
 
 ```swift
 protocol Responsable: Decodable {
-     /// ``Result`` are conforms ``Decodable``
+	 /// ``Result`` are conforms ``Decodable``
     associatedtype Result: Result
     var id: Int { get }
     var result: Result { get }
@@ -158,7 +157,7 @@ struct APIResponse<Result>: Decodable where Result: Resultable {
 func send<Result>(uRLRequest: URLRequest, with session: URLSession) async throws -> APIResponse<Result> {
     let (data, response) = try await session.data(for: uRLRequest)
     guard 200 == response.statusCode else { fatalError() }
-     // 5
+	 // 5
     return try JSONDecoder().decode(APIResponse<Result>.self, from: data)
 }
 
@@ -178,7 +177,7 @@ So let’s examine this bit of code more closely:
 
 There’s one more thing yet.
 
-All that way of managing this code is give you a passibility to extend that generic method to literally any amount of types with just one line of code by just conforming any given type to `Resultable` protocol.
+All that way of managing this code is give you a passibility to extend that generic method to literally any amount of types with just one line of code by just conforming any given type to `Resultable` protocol. 
 
 And this working even on client side. So if you’re some network library (like us) this solutions gives your users the ability to create their own `Result` types and using them instead of that you’re providing. This is the thing.
 
@@ -194,9 +193,9 @@ let result: APIResponse<ClientImplementationResultSecond> = try await APIRequest
 ```
 
 ## Limitations
-* Again, this method doesn’t work if you’re using shorthand call (it’ll not compiles).
+* Again, this method doesn’t work if you’re using shorthand call (it’ll not compiles). 
 * And this method couldn’t be turned upside down to use it for `encode` some generic type (e.g. create generic request). Or at least we haven’t found it yet, so if you do, please tell us.
 
 ## Conclusion
-So this is how the lack of generic protocol usage could be bypassed. This method is less required during 5.7 release, because of implementing both [SE-0309](https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md "") and [SE-0346](https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md "") proposals. But yet there’s (as always) no backward capability provided by Apple, there’s a room for using this solution at least for two more years if you’re indy and for kinda forever if you’re hard tuff enterprise app core team developer.
+So this is how the lack of generic protocol usage could be bypassed. This method is less required during 5.7 release, because of implementing both [SE-0309](https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md "") and [SE-0346](https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md "") proposals. But yet there’s (as always) no backward capability provided by Apple, there’s a room for using this solution at least for two more years if you’re indy and for kinda forever if you’re hard tough enterprise app developer with minimal target deployment somewhere about iOS 7 so far.
 
