@@ -5,21 +5,18 @@ draft: false
 tags: [swift, generics, decodable, API]
 ---
 ## Abstract
-Prior the **Swift 5.7** release there is a lack of using protocol with `associatedtype` either as a type of passed argument or as a returning type. Prior this release both options to solve such tasks as with [SE-0309](https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md "") and [SE-0346](https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md "") are not available.
 
-But, you know, this tasks are still exists there. So Apple names its way to solve them in the past:
+Prior to the Swift 5.7 release, there was a lack of support for using protocols with associatedtype as a type of passed argument or as a returning type. Prior to this release, the options to solve such tasks as with [SE-0309](https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md "") and [SE-0346](https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md "") were not available.
 
-> do a lot of boilerplate code e.g. to write as much overloaded methods as it needs to cover all cases.
+However, these tasks still exist. In the past, Apple's solution was to do a lot of boilerplate code, such as writing many overloaded methods to cover all cases.
 
-Let’s review another one that solves not all, but some tasks from above.
+Let's review another solution that solves some, but not all of these tasks.
 
 ## Problem overview
-The problem comes from the protocols restrictions on one hand and generics restrictions on another. Let’s dig it. 
 
-Let’s say we’re willing to implement method that will be decode any `Decodable` object that i’ll get. This is a meaningful task in case that we’re receiving useful server response wrapped within almost static object, and we want to cover this response with a single type.
+The problem comes from the restrictions of protocols and generics. To illustrate this, let's consider the task of implementing a method that can decode any Decodable object. This is a useful task when receiving a server response wrapped in object that couldn't be mapped to a JSON key, and we want to cover this response with a single type.
 
-Here’s the example of possible received JSON objects:
-First object
+As an example, we have two possible received JSON objects:
 ```json
 {
     "id": 1,
@@ -31,7 +28,6 @@ First object
 }
 ```
 
-Second object:
 ```json
 {
     "id": 1,
@@ -44,11 +40,10 @@ Second object:
 }
 ```
 
-Leaving API design quality out of scope, let’s work with what we’ve got.
+The preferred solution would be to implement one generic method and three structures, one for each given result case, and one for the response itself.
 
-In this case preferred solution would be to implement one generic method and three structures, one for each given result case and one for response itself.
+We can define structs for each type of the result object:
 
-Let’s do it:
 ```swift
 // `result` object for first kind of server response
 struct ResultFirstKind: Decodable {
@@ -64,32 +59,32 @@ struct ResultSecondKind: Decodable {
 }
 ```
 
-Everything is going good, let’s implement the wrapper type head-on:
+and a wrapper struct for the response:
+
 ```swift
 struct Response: Decodable {
     let id: Int
     let result: Decodable
     let client: String
 }
-
-
+```
+However, when we try to implement a method that uses this struct, such as:
+```swift
 func send(uRLRequest: URLRequest, with session: URLSession) async throws -> Response {
     let (data, response) = try await session.data(for: uRLRequest)
     guard 200 == response.statusCode else { fatalError() }
     return try JSONDecoder().decode(APIResponse.self, from: data)
 }
 ```
-
-And here’s we’ve faced huge problem:
-> Compiler could not infers type of concrete `result` field in implementation for exact call. Since it could be **any** decodable type e.g. and there’s not even a hint to which it will be in exact call.
+we face a problem: the compiler cannot infer the type of the concrete result field in the implementation for an exact call with ``. Since it could be any decodable type, there is not even a hint as to which it will be in the exact call.
 
 ## Problem summary
-Let’s provide problem summary:
-1. Compiler could not infer non generic type from protocol set as a method parameter type neither its returning type, we have to tell compiler the concrete type which is covered under generic one in method calling code then in method declaration one instead.
-2. Protocols with `associatedtype` value could not be used as a constraint for generic method type parameter neither returning in swift version prior 5.7, we need a way to pass that required restrictions into the call chain to limit possible type to that that we’re awaiting for.
+1. In Swift, the compiler cannot infer a non-generic type from a protocol set as a method parameter type or its returning type. We have to explicitly specify the concrete type that is covered under the generic one in the method calling code and in the method declaration.
+2. Prior to Swift version 5.7, protocols with associatedtype values could not be used as a constraint for a generic method type parameter or return type. Therefore, we need a way to pass the required restrictions into the call chain to limit the possible types to those that we are expecting.
 
 ## The solution
-Long story short: here’s the solution code.
+The solution is to use a combination of generics and protocols to provide the necessary type information to the compiler.
+
 ```swift
 // 1
 protocol Resultable: Decodable { }
@@ -124,21 +119,18 @@ func send<Result>(uRLRequest: URLRequest, with session: URLSession) async throws
 // 5
 let result: APIResponse<ResultSecondKind> = try await APIRequest.send(uRLRequest: URLRequest(url: URL("http://google.com")!), with: URLSession.shared)
 ```
-> explicitly declaring `Result` type in function call is **required**.
 
-Let’s examine this bit of code more closely:
+1. The `Resultable` protocol is declared, this protocol restricts the variation of types that conform to `Decodable` to types that we are expecting to be in the server response.
+2. The possible `Result` types that could be returned by the server are implemented. Both of them conform to both the `Resultable` and `Decodable` protocols.
+3. The `APIResponse<Result>` structure is declared which declares a generic type `Result` with a constraint to types that conform to the `Resultable` protocol.
+4. A generic method `send<Result>(...) ... -> APIResponse<Result>` is implemented that returns a concrete `APIResponse` type but with a yet generic property `Result`.
+5. In the call of the send method, explicitly declaring the `Result` type in the function call is required. This notation let result: `APIResponse<ResultSecondKind> = ... send()` tells the compiler what concrete type we are expecting for a given call. And by this call, the compiler can infer the type that will be used.
 
-1. `Resultable` protocol declaration, this protocol restricts variation of types conforms `Decodable` to types that we’re waiting to be in server response.
-2. Implementation of both possible `Result` types which could be returned by a server, both of them are conformed to both `Resultable` and `Decodable` protocols.
-3. `APIResponse<Result>` structure declaration which declares generic type `Result` with constraint it to types that conforms `Resultable` protocol.
-4. Generic method `send<Result>(...) ... -> APIResponse<Result>` that returns concrete `APIResponse` type but with yet generic property `Result`.
-5. Call of `send` method. And this notation `let result: APIResponse<ResultSecondKind> = ... send()` this is the thing. **This longhand notation are required**, because this is the place and the way how and where we tell compiler what concrete type we’re awaiting for exact given call. And by this call compiler could infer what type will be.
+In this way, we can use the `APIResponse` struct to wrap any type of `Decodable` object and the send method to handle it correctly.
 
-There’s one more thing yet.
+This solution also gives you the possibility to extend the generic method with one line of code by conforming a given type to the Resultable protocol.
 
-This solution gives you a passibility to extend that generic method with one line of code by conforming a given type to `Resultable` protocol. 
-
-This works on client side too. If you’re network library (like [we are](https://github.com/skywinder/web3swift#send-erc-20-token)) this is a thing, because your users can pass there their own `Result` types instead of provided by you, which gives a broad flexibility without increasing complexity.
+This works on the client side as well. If you're using a network library, this is a great feature because your users can pass in their own Result types instead of the ones provided by you, which gives a broad flexibility without increasing complexity.
 
 ```swift
 struct ClientImplementationResultSecond: Responsable {
@@ -151,7 +143,7 @@ struct ClientImplementationResultSecond: Responsable {
 let result: APIResponse<ClientImplementationResultSecond> = try await APIRequest.send(uRLRequest: URLRequest(url: URL("http://google.com")!), with: URLSession.shared)
 ```
 
-## Limitations
-* Again, this method doesn’t work if you’re using shorthand call (it’ll not compiles). 
-* And this method couldn’t be turned upside down to use it for `encode` generic type (e.g. create generic request). Or at least we haven’t found it yet, so if you do, please tell us.
+Limitations
 
+- This method does not work if you're using shorthand call (it will not compile).
+- This method couldn't be turned upside down to use it for encode generic type (e.g. create generic request). At least we haven't found it yet, so if you do, please let us know.
