@@ -4,22 +4,17 @@
 &lt;svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg">&lt;path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;/svg>
 &lt;/a>
 &lt;/span>
-&lt;/h2>&lt;p>Prior the &lt;strong>Swift 5.7&lt;/strong> release there is a lack of using protocol with &lt;code>associatedtype&lt;/code> either as a type of passed argument or as a returning type. Prior this release both options to solve such tasks as with &lt;a href="https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md" title="">SE-0309&lt;/a> and &lt;a href="https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md" title="">SE-0346&lt;/a> are not available.&lt;/p>
-&lt;p>But, you know, this tasks are still exists there. So Apple names its way to solve them in the past:&lt;/p>
-&lt;blockquote>
-&lt;p>do a lot of boilerplate code e.g. to write as much overloaded methods as it needs to cover all cases.&lt;/p>
-&lt;/blockquote>
-&lt;p>Let’s review another one that solves not all, but some tasks from above.&lt;/p>
+&lt;/h2>&lt;p>Prior to the Swift 5.7 release, there was a lack of support for using protocols with associatedtype as a type of passed argument or as a returning type. Prior to this release, the options to solve such tasks as with &lt;a href="https://github.com/apple/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md" title="">SE-0309&lt;/a> and &lt;a href="https://github.com/apple/swift-evolution/blob/main/proposals/0346-light-weight-same-type-syntax.md" title="">SE-0346&lt;/a> were not available.&lt;/p>
+&lt;p>However, these tasks still exist. In the past, Apple&amp;rsquo;s solution was to do a lot of boilerplate code, such as writing many overloaded methods to cover all cases.&lt;/p>
+&lt;p>Let&amp;rsquo;s review another solution that solves some, but not all of these tasks.&lt;/p>
 &lt;h2 id="problem-overview" >Problem overview
 &lt;span>
 &lt;a href="#problem-overview">
 &lt;svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg">&lt;path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;/svg>
 &lt;/a>
 &lt;/span>
-&lt;/h2>&lt;p>The problem comes from the protocols restrictions on one hand and generics restrictions on another. Let’s dig it.&lt;/p>
-&lt;p>Let’s say we’re willing to implement method that will be decode any &lt;code>Decodable&lt;/code> object that i’ll get. This is a meaningful task in case that we’re receiving useful server response wrapped within almost static object, and we want to cover this response with a single type.&lt;/p>
-&lt;p>Here’s the example of possible received JSON objects:
-First object&lt;/p>
+&lt;/h2>&lt;p>The problem comes from the restrictions of protocols and generics. To illustrate this, let&amp;rsquo;s consider the task of implementing a method that can decode any Decodable object. This is a useful task when receiving a server response wrapped in object that couldn&amp;rsquo;t be mapped to a JSON key, and we want to cover this response with a single type.&lt;/p>
+&lt;p>As an example, we have two possible received JSON objects:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;id&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">1&lt;/span>,
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;result&amp;#34;&lt;/span>: {
@@ -28,8 +23,7 @@ First object&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;client&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;iOS&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Second object:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-json" data-lang="json">&lt;span style="display:flex;">&lt;span>{
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;id&amp;#34;&lt;/span>: &lt;span style="color:#ae81ff">1&lt;/span>,
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;result&amp;#34;&lt;/span>: {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;thidrKey&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;okok&amp;#34;&lt;/span>,
@@ -38,9 +32,8 @@ First object&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> },
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">&amp;#34;client&amp;#34;&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;iOS&amp;#34;&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Leaving API design quality out of scope, let’s work with what we’ve got.&lt;/p>
-&lt;p>In this case preferred solution would be to implement one generic method and three structures, one for each given result case and one for response itself.&lt;/p>
-&lt;p>Let’s do it:&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>The preferred solution would be to implement one generic method and three structures, one for each given result case, and one for the response itself.&lt;/p>
+&lt;p>We can define structs for each type of the result object:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-swift" data-lang="swift">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// `result` object for first kind of server response&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">struct&lt;/span> &lt;span style="color:#a6e22e">ResultFirstKind&lt;/span>: Decodable {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> firstKey: Int
@@ -53,33 +46,28 @@ First object&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> fourthKey: Bool
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> fifthKey: Int
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Everything is going good, let’s implement the wrapper type head-on:&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>and a wrapper struct for the response:&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-swift" data-lang="swift">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">struct&lt;/span> &lt;span style="color:#a6e22e">Response&lt;/span>: Decodable {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> id: Int
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> result: Decodable
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> client: String
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">send&lt;/span>(uRLRequest: URLRequest, with session: URLSession) async &lt;span style="color:#66d9ef">throws&lt;/span> -&amp;gt; Response {
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>However, when we try to implement a method that uses this struct, such as:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-swift" data-lang="swift">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">send&lt;/span>(uRLRequest: URLRequest, with session: URLSession) async &lt;span style="color:#66d9ef">throws&lt;/span> -&amp;gt; Response {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> (data, response) = &lt;span style="color:#66d9ef">try&lt;/span> await session.data(&lt;span style="color:#66d9ef">for&lt;/span>: uRLRequest)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">guard&lt;/span> &lt;span style="color:#ae81ff">200&lt;/span> == response.statusCode &lt;span style="color:#66d9ef">else&lt;/span> { fatalError() }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">try&lt;/span> JSONDecoder().decode(APIResponse.&lt;span style="color:#66d9ef">self&lt;/span>, from: data)
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And here’s we’ve faced huge problem:&lt;/p>
-&lt;blockquote>
-&lt;p>Compiler could not infers type of concrete &lt;code>result&lt;/code> field in implementation for exact call. Since it could be &lt;strong>any&lt;/strong> decodable type e.g. and there’s not even a hint to which it will be in exact call.&lt;/p>
-&lt;/blockquote>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>we face a problem: the compiler cannot infer the type of the concrete result field in the implementation for an exact call with ``. Since it could be any decodable type, there is not even a hint as to which it will be in the exact call.&lt;/p>
 &lt;h2 id="problem-summary" >Problem summary
 &lt;span>
 &lt;a href="#problem-summary">
 &lt;svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg">&lt;path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;/svg>
 &lt;/a>
 &lt;/span>
-&lt;/h2>&lt;p>Let’s provide problem summary:&lt;/p>
-&lt;ol>
-&lt;li>Compiler could not infer non generic type from protocol set as a method parameter type neither its returning type, we have to tell compiler the concrete type which is covered under generic one in method calling code then in method declaration one instead.&lt;/li>
-&lt;li>Protocols with &lt;code>associatedtype&lt;/code> value could not be used as a constraint for generic method type parameter neither returning in swift version prior 5.7, we need a way to pass that required restrictions into the call chain to limit possible type to that that we’re awaiting for.&lt;/li>
+&lt;/h2>&lt;ol>
+&lt;li>In Swift, the compiler cannot infer a non-generic type from a protocol set as a method parameter type or its returning type. We have to explicitly specify the concrete type that is covered under the generic one in the method calling code and in the method declaration.&lt;/li>
+&lt;li>Prior to Swift version 5.7, protocols with associatedtype values could not be used as a constraint for a generic method type parameter or return type. Therefore, we need a way to pass the required restrictions into the call chain to limit the possible types to those that we are expecting.&lt;/li>
 &lt;/ol>
 &lt;h2 id="the-solution" >The solution
 &lt;span>
@@ -87,7 +75,7 @@ First object&lt;/p>
 &lt;svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg">&lt;path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;/svg>
 &lt;/a>
 &lt;/span>
-&lt;/h2>&lt;p>Long story short: here’s the solution code.&lt;/p>
+&lt;/h2>&lt;p>The solution is to use a combination of generics and protocols to provide the necessary type information to the compiler.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-swift" data-lang="swift">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 1&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">protocol&lt;/span> &lt;span style="color:#a6e22e">Resultable&lt;/span>: Decodable { }
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
@@ -120,20 +108,16 @@ First object&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 5&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">let&lt;/span> result: APIResponse&amp;lt;ResultSecondKind&amp;gt; = &lt;span style="color:#66d9ef">try&lt;/span> await APIRequest.send(uRLRequest: URLRequest(url: URL(&lt;span style="color:#e6db74">&amp;#34;http://google.com&amp;#34;&lt;/span>)&lt;span style="color:#f92672">!&lt;/span>), with: URLSession.shared)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
-&lt;p>explicitly declaring &lt;code>Result&lt;/code> type in function call is &lt;strong>required&lt;/strong>.&lt;/p>
-&lt;/blockquote>
-&lt;p>Let’s examine this bit of code more closely:&lt;/p>
-&lt;ol>
-&lt;li>&lt;code>Resultable&lt;/code> protocol declaration, this protocol restricts variation of types conforms &lt;code>Decodable&lt;/code> to types that we’re waiting to be in server response.&lt;/li>
-&lt;li>Implementation of both possible &lt;code>Result&lt;/code> types which could be returned by a server, both of them are conformed to both &lt;code>Resultable&lt;/code> and &lt;code>Decodable&lt;/code> protocols.&lt;/li>
-&lt;li>&lt;code>APIResponse&amp;lt;Result&amp;gt;&lt;/code> structure declaration which declares generic type &lt;code>Result&lt;/code> with constraint it to types that conforms &lt;code>Resultable&lt;/code> protocol.&lt;/li>
-&lt;li>Generic method &lt;code>send&amp;lt;Result&amp;gt;(...) ... -&amp;gt; APIResponse&amp;lt;Result&amp;gt;&lt;/code> that returns concrete &lt;code>APIResponse&lt;/code> type but with yet generic property &lt;code>Result&lt;/code>.&lt;/li>
-&lt;li>Call of &lt;code>send&lt;/code> method. And this notation &lt;code>let result: APIResponse&amp;lt;ResultSecondKind&amp;gt; = ... send()&lt;/code> this is the thing. &lt;strong>This longhand notation are required&lt;/strong>, because this is the place and the way how and where we tell compiler what concrete type we’re awaiting for exact given call. And by this call compiler could infer what type will be.&lt;/li>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ol>
+&lt;li>The &lt;code>Resultable&lt;/code> protocol is declared, this protocol restricts the variation of types that conform to &lt;code>Decodable&lt;/code> to types that we are expecting to be in the server response.&lt;/li>
+&lt;li>The possible &lt;code>Result&lt;/code> types that could be returned by the server are implemented. Both of them conform to both the &lt;code>Resultable&lt;/code> and &lt;code>Decodable&lt;/code> protocols.&lt;/li>
+&lt;li>The &lt;code>APIResponse&amp;lt;Result&amp;gt;&lt;/code> structure is declared which declares a generic type &lt;code>Result&lt;/code> with a constraint to types that conform to the &lt;code>Resultable&lt;/code> protocol.&lt;/li>
+&lt;li>A generic method &lt;code>send&amp;lt;Result&amp;gt;(...) ... -&amp;gt; APIResponse&amp;lt;Result&amp;gt;&lt;/code> is implemented that returns a concrete &lt;code>APIResponse&lt;/code> type but with a yet generic property &lt;code>Result&lt;/code>.&lt;/li>
+&lt;li>In the call of the send method, explicitly declaring the &lt;code>Result&lt;/code> type in the function call is required. This notation let result: &lt;code>APIResponse&amp;lt;ResultSecondKind&amp;gt; = ... send()&lt;/code> tells the compiler what concrete type we are expecting for a given call. And by this call, the compiler can infer the type that will be used.&lt;/li>
 &lt;/ol>
-&lt;p>There’s one more thing yet.&lt;/p>
-&lt;p>This solution gives you a passibility to extend that generic method with one line of code by conforming a given type to &lt;code>Resultable&lt;/code> protocol.&lt;/p>
-&lt;p>This works on client side too. If you’re network library (like &lt;a href="https://github.com/skywinder/web3swift#send-erc-20-token">we are&lt;/a>) this is a thing, because your users can pass there their own &lt;code>Result&lt;/code> types instead of provided by you, which gives a broad flexibility without increasing complexity.&lt;/p>
+&lt;p>In this way, we can use the &lt;code>APIResponse&lt;/code> struct to wrap any type of &lt;code>Decodable&lt;/code> object and the send method to handle it correctly.&lt;/p>
+&lt;p>This solution also gives you the possibility to extend the generic method with one line of code by conforming a given type to the Resultable protocol.&lt;/p>
+&lt;p>This works on the client side as well. If you&amp;rsquo;re using a network library, this is a great feature because your users can pass in their own Result types instead of the ones provided by you, which gives a broad flexibility without increasing complexity.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-swift" data-lang="swift">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">struct&lt;/span> &lt;span style="color:#a6e22e">ClientImplementationResultSecond&lt;/span>: Responsable {
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> thidrKey: String
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">let&lt;/span> fourthKey: Bool
@@ -142,13 +126,8 @@ First object&lt;/p>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// all good&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">let&lt;/span> result: APIResponse&amp;lt;ClientImplementationResultSecond&amp;gt; = &lt;span style="color:#66d9ef">try&lt;/span> await APIRequest.send(uRLRequest: URLRequest(url: URL(&lt;span style="color:#e6db74">&amp;#34;http://google.com&amp;#34;&lt;/span>)&lt;span style="color:#f92672">!&lt;/span>), with: URLSession.shared)
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="limitations" >Limitations
-&lt;span>
-&lt;a href="#limitations">
-&lt;svg viewBox="0 0 28 23" height="100%" width="19" xmlns="http://www.w3.org/2000/svg">&lt;path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/>&lt;/svg>
-&lt;/a>
-&lt;/span>
-&lt;/h2>&lt;ul>
-&lt;li>Again, this method doesn’t work if you’re using shorthand call (it’ll not compiles).&lt;/li>
-&lt;li>And this method couldn’t be turned upside down to use it for &lt;code>encode&lt;/code> generic type (e.g. create generic request). Or at least we haven’t found it yet, so if you do, please tell us.&lt;/li>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Limitations&lt;/p>
+&lt;ul>
+&lt;li>This method does not work if you&amp;rsquo;re using shorthand call (it will not compile).&lt;/li>
+&lt;li>This method couldn&amp;rsquo;t be turned upside down to use it for encode generic type (e.g. create generic request). At least we haven&amp;rsquo;t found it yet, so if you do, please let us know.&lt;/li>
 &lt;/ul></description></item></channel></rss>
